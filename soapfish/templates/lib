@@ -78,14 +78,19 @@ class {{ class_name|capitalize }}(xsd.ComplexType):
     ''
 {%- endif %}
 {%- if ct.complexContent %}
-    {%- if ct.complexContent.restriction %}
-class {{ ct.name|capitalize }}({{ ct.complexContent.restriction.base|type(known_types) }}):
-    INHERITANCE = xsd.Inheritance.RESTRICTION
-    {%- set content = ct.complexContent.restriction %}
+    {%- if ct.name is undefined or ct.name is none %}
+        {%- set ct_name = class_name %}
     {%- else %}
-class {{ ct.name|capitalize }}({{ ct.complexContent.extension.base|type(known_types) }}):
+        {%- set ct_name = ct.name %}
+    {%- endif %}
+    {%- if ct.complexContent.restriction %}
+class {{ ct_name|capitalize }}({{ ct.complexContent.restriction.base|type(known_types) }}):
+    INHERITANCE = xsd.Inheritance.RESTRICTION
+    {% set content = ct.complexContent.restriction %}
+    {%- else %}
+class {{ ct_name|capitalize }}({{ ct.complexContent.extension.base|type(known_types) }}):
     INHERITANCE = xsd.Inheritance.EXTENSION
-    {%- set content = ct.complexContent.extension %}
+    {% set content = ct.complexContent.extension %}
     {%- endif %}
 {%- elif ct.sequence %}
 class {{ class_name|capitalize }}(xsd.ComplexType):
