@@ -164,7 +164,9 @@ def main():
         from soapfish import xsd
         from soapfish.xsd import UNBOUNDED
     '''))
-    code = generate_code_from_xsd(xmlelement, encoding='utf-8')
+
+    cwd = os.getcwd()
+    code = generate_code_from_xsd(xmlelement, encoding='utf-8', cwd=cwd)
     # In Python 3 encoding a string returns bytes so we have to write the
     # generated code to sys.stdout.buffer instead of sys.stdout.
     # We should not depend on Python 3's "auto-conversion to console charset"
