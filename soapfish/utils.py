@@ -55,9 +55,7 @@ def get_get_type(xsd_namespaces):
             if known_types is not None and typename in known_types:
                 return "%s" % capitalize(typename)
             else:
-                # return "__name__ + '.%s'" % capitalize(typename)
-                # this change will probably only work for our special case
-                return capitalize(typename)
+                return "__name__ + '.%s'" % capitalize(typename)
     return get_type
 
 
