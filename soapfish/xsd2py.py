@@ -134,6 +134,14 @@ def _reorder_complexTypes(schema):
         else:
             base = ''
 
+        # get rid of namespace qualifiers if target namespace and qualifier match
+        if schema.SCHEMA.elementFormDefault == xsd.ElementFormDefault.QUALIFIED and ":" in base:
+            base_ns = base.split(':')[0]
+            nsmap = schema._xmlelement.nsmap
+            if base_ns in nsmap:
+                if nsmap[base_ns] == schema.targetNamespace:
+                    base = base.split(':')[1]
+
         weights[complex_type.name] = (n, base)
 
     def _cmp(a, b):
