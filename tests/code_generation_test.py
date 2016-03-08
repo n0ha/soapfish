@@ -262,11 +262,188 @@ WSDL = b"""<?xml version="1.0" encoding="utf-8"?>
 </wsdl:definitions>"""
 
 
+XSD_with_ordering = b"""<?xml version = "1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ elementFormDefault="qualified" attributeFormDefault="unqualified" targetNamespace="http://www.sk.o2.com/O2BS/Service/Base/1.0" xmlns:o2bsmsg="http://www.sk.o2.com/O2BS/Service/Base/1.0" >
+
+
+  <xsd:complexType name="ApplicationException">
+   <xsd:complexContent>
+    <xsd:extension base="o2bsmsg:BaseException">
+
+    </xsd:extension>
+   </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="ApplicationException" type="o2bsmsg:ApplicationException"/>
+
+  <xsd:complexType name="BaseException">
+   <xsd:complexContent>
+    <xsd:extension base="o2bsmsg:BaseResponse">
+      <xsd:sequence>
+       <xsd:element name="code" type="xsd:string" nillable="true"/>
+       <xsd:element name="message" type="xsd:string" minOccurs="0" nillable="true"/>
+       <xsd:element name="source" type="xsd:string" minOccurs="0" nillable="true"/>
+       <xsd:element name="system" type="xsd:string" minOccurs="0" nillable="true"/>
+       <xsd:element name="stackTrace" type="xsd:string" minOccurs="0" nillable="true"/>
+       <xsd:element name="obj" type="xsd:string" minOccurs="0" nillable="true"/>
+      </xsd:sequence>
+    </xsd:extension>
+   </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="BaseRequest" abstract="true">
+   <xsd:complexContent>
+    <xsd:extension base="o2bsmsg:Message">
+      <xsd:sequence>
+       <xsd:element name="requestorDN" type="xsd:string" nillable="true"/>
+       <xsd:element name="userDN" type="xsd:string" minOccurs="0" nillable="true"/>
+      </xsd:sequence>
+    </xsd:extension>
+   </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="BaseResponse" abstract="true">
+   <xsd:complexContent>
+    <xsd:extension base="o2bsmsg:Message">
+      <xsd:sequence>
+       <xsd:element name="requestorDN" type="xsd:string" nillable="true"/>
+       <xsd:element name="correlationId" type="xsd:string" minOccurs="0" nillable="true"/>
+       <xsd:element name="processingReport" type="xsd:string" minOccurs="0" nillable="true"/>
+      </xsd:sequence>
+    </xsd:extension>
+   </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="Message" abstract="true">
+   <xsd:sequence>
+    <xsd:annotation>
+     <xsd:documentation>
+      Root message body. Body of all messages, which are sent on integration platform shall be inherited from this class.
+
+     </xsd:documentation>
+    </xsd:annotation>
+    <xsd:element name="messageId" nillable="true">
+     <xsd:annotation>
+      <xsd:documentation>
+       System-wide unique identifier of message.
+      </xsd:documentation>
+     </xsd:annotation>
+     <xsd:simpleType>
+      <xsd:restriction base="xsd:string">
+       <xsd:pattern value="(\p{Lu})+::(\p{IsBasicLatin})+"/>
+      </xsd:restriction>
+     </xsd:simpleType>
+    </xsd:element>
+    <xsd:element name="timestamp" type="xsd:dateTime" minOccurs="0" nillable="true"/>
+   </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="ObjectNotFoundException">
+   <xsd:complexContent>
+    <xsd:extension base="o2bsmsg:BaseException">
+
+    </xsd:extension>
+   </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="ObjectNotFoundException" type="o2bsmsg:ObjectNotFoundException"/>
+
+  <xsd:complexType name="SystemException">
+   <xsd:complexContent>
+    <xsd:extension base="o2bsmsg:BaseException">
+
+    </xsd:extension>
+   </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="SystemException" type="o2bsmsg:SystemException"/>
+
+  <xsd:complexType name="BaseCommand">
+   <xsd:complexContent>
+    <xsd:extension base="o2bsmsg:Message">
+      <xsd:sequence>
+       <xsd:element name="requestorDN" type="xsd:string" nillable="true">
+        <xsd:annotation>
+         <xsd:documentation>
+          Distinguished name of component, which sent the request. The list of distinguished names will be specified in [EAI-DP].
+         </xsd:documentation>
+        </xsd:annotation>
+       </xsd:element>
+       <xsd:element name="userDN" type="xsd:string" minOccurs="0" nillable="true">
+        <xsd:annotation>
+         <xsd:documentation>
+          User, who performed the command.
+         </xsd:documentation>
+        </xsd:annotation>
+       </xsd:element>
+      </xsd:sequence>
+    </xsd:extension>
+   </xsd:complexContent>
+  </xsd:complexType>
+
+</xsd:schema>
+"""
+
+XSD_with_ordering_and_elements = b"""<?xml version = "1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ elementFormDefault="qualified" attributeFormDefault="unqualified" targetNamespace="http://www.sk.o2.com/O2BS/Service/Provisioning/1.0" xmlns:prov="http://www.sk.o2.com/O2BS/Service/Provisioning/1.0" xmlns:o2bsmsg="http://www.sk.o2.com/O2BS/Service/Base/1.0"
+xmlns:typ="http://www.sk.o2.com/O2BS/BE/BasicTypes/1.0"
+xmlns:com="http://www.sk.o2.com/O2BS/BE/Common/1.0">
+
+
+  <xsd:complexType name="ActivateSubscriberProvisioningOrder">
+   <xsd:complexContent>
+    <xsd:extension base="prov:ProvisioningOrder">
+      <xsd:sequence>
+       <xsd:element name="orderItem" type="prov:ProvisioningOrder" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+      </xsd:sequence>
+    </xsd:extension>
+   </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="ProvisioningOrder">
+   <xsd:sequence>
+    <xsd:element name="subscriber" type="prov:ProvSubscriberKey" minOccurs="0" nillable="true"/>
+    <xsd:element name="orderId" type="IDEntityKey" minOccurs="0" nillable="true"/>
+   </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="ProvSubscriberKey">
+   <xsd:sequence>
+    <xsd:element name="value" type="xsd:string" minOccurs="0" nillable="true"/>
+   </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="EntityKey" abstract="true">
+  </xsd:complexType>
+
+  <xsd:complexType name="IDEntityKey">
+   <xsd:complexContent>
+    <xsd:extension base="EntityKey">
+      <xsd:sequence>
+       <xsd:element name="value" type="xsd:string" nillable="true"/>
+      </xsd:sequence>
+    </xsd:extension>
+   </xsd:complexContent>
+  </xsd:complexType>
+
+</xsd:schema>
+"""
+
 class CodeGenerationTest(unittest.TestCase):
 
     def test_code_generation_from_xsd(self):
         xmlelement = etree.fromstring(XSD)
         # Add mandatory imports to test the generated code
+        code = b'from soapfish import soap, xsd\n' + generate_code_from_xsd(xmlelement)
+        self._exec(code, {})
+
+    def test_code_generation_from_xsd_with_ordering(self):
+        xmlelement = etree.fromstring(XSD_with_ordering)
+        # Add mandatory imports to test the generated code
+        code = b'from soapfish import soap, xsd\n' + generate_code_from_xsd(xmlelement)
+        self._exec(code, {})
+
+    def test_code_generation_from_xsd_with_ordering_and_elements(self):
+        xmlelement = etree.fromstring(XSD_with_ordering_and_elements)
         code = b'from soapfish import soap, xsd\n' + generate_code_from_xsd(xmlelement)
         self._exec(code, {})
 
