@@ -125,24 +125,30 @@ def _reorder_complexTypes(schema):
     weights = {}
     for n, complex_type in enumerate(schema.complexTypes):
         content = complex_type.complexContent
+        sequence = complex_type.sequence
 
+        dependencies = []
+
+        # get base name
         if content:
             extension = content.extension
             restriction = content.restriction
             base = extension and extension.base or \
                 restriction and restriction.base
-        else:
-            base = ''
+            base = unqualify(base, schema)
+            if ':' not in base:
+                dependencies.append(base)
 
-        # get rid of namespace qualifiers if target namespace and qualifier match
-        if schema.SCHEMA.elementFormDefault == xsd.ElementFormDefault.QUALIFIED and ":" in base:
-            base_ns = base.split(':')[0]
-            nsmap = schema._xmlelement.nsmap
-            if base_ns in nsmap:
-                if nsmap[base_ns] == schema.targetNamespace:
-                    base = base.split(':')[1]
+        # get element names
+        # skip xsd: elements
+        if sequence:
+            deps_filtered = []
+            for d in [unqualify(e.type, schema) for e in sequence.elements if e.type]:
+                if ':' not in d:
+                    deps_filtered.append(d)
+            dependencies += deps_filtered
 
-        weights[complex_type.name] = (n, base)
+        weights[complex_type.name] = (n, dependencies)
 
     def _cmp(a, b):
         try:
@@ -155,30 +161,98 @@ def _reorder_complexTypes(schema):
         except AttributeError:
             pass
 
-        w_a, base_a = weights[a]
-        w_b, base_b = weights[b]
+        w_a = ''
+        w_b = ''
+        deps_a = []
+        deps_b = []
+
+        try:
+            w_a, deps_a = expanded_weights[a]
+        except KeyError:
+            pass
+
+        try:
+            w_b, deps_b = expanded_weights[b]
+        except KeyError:
+            pass
 
         # a and b are not extension/restriction
-        if not base_a and not base_b:
+        if not deps_a and not deps_b:
             return w_a - w_b
 
         # a is a extension/restriction of b: a > b
-        if base_a == b or ":" in base_a:
+        if b in deps_a:
             return 1
 
         # b is a extension/restriction of a: a < b
-        if base_b == a or ":" in base_b:
+        if a in deps_b:
             return -1
 
-        # inconclusive, do the same test with their bases
-        return _cmp(base_a or a, base_b or b)
+        # if neither, use the indexes
+        return w_a - w_b
 
+    expanded_weights = expand_dependencies(weights)
     sort_kw = {}
     try:
         sort_kw['key'] = functools.cmp_to_key(_cmp)
     except AttributeError:
         sort_kw['cmp'] = _cmp
     schema.complexTypes.sort(**sort_kw)
+
+    # debug
+    for c in schema.complexTypes:
+        logger.info("-- %s" % c.name)
+
+
+def expand_dependencies(weights):
+    expanded_weights = {}
+
+    def deps(name):
+        if name not in weights:
+            logger.warn("Element '%s' not in dependency dict. Probably a simpleType, ignoring." % name)
+            return []
+        return [x for x in weights[name][1] if x is not None]
+
+    def expand(name):
+        current_level = deps(name)
+        next_level_deps = [name]
+        if current_level:
+            for n in current_level:
+                expanded = expand(n)
+                if name in expanded:
+                    raise RuntimeError("circular dependencies detected for %s" % name)
+                next_level_deps += expanded
+        return next_level_deps
+
+    for original_key, original_value in weights.items():
+        expanded_list = []
+        for dependency in deps(original_key):
+            expanded_list += expand(dependency)
+        expanded_weights[original_key] = (original_value[0], expanded_list)
+
+    return expanded_weights
+
+
+def unqualify(name, schema):
+    """
+    Get rid of namespace qualifiers if target namespace and qualifier match.
+
+    :rtype: str
+    :param name: name of the element to unqualify
+    :param schema: schema object of the current document
+    :return: unqualified element name, or None
+    """
+    if name is None:
+        return None
+
+    if schema.SCHEMA.elementFormDefault == xsd.ElementFormDefault.QUALIFIED and ":" in name:
+        base_ns = name.split(':')[0]
+        # TODO dont use private properties
+        nsmap = schema._xmlelement.nsmap
+        if base_ns in nsmap:
+            if nsmap[base_ns] == schema.targetNamespace:
+                name = name.split(':')[1]
+    return name
 
 
 def schema_to_py(schema, xsd_namespace, known_files=None, location=None,
