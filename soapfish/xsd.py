@@ -176,9 +176,10 @@ class String(SimpleType):
         value = self._clean_whitespace(value)
 
         if self.pattern:
-            pattern = self.pattern + '$'
-            if re.match(pattern, value) is None:
-                raise ValueError("Value '%s' doesn't match pattern '%s'" % (value, self.pattern))
+            pass
+            # pattern = self.pattern + '$'
+            # if re.match(pattern, value) is None:
+            #    raise ValueError("Value '%s' doesn't match pattern '%s'" % (value, self.pattern))
 
         if self.enumeration:
             if not (value in self.enumeration):
