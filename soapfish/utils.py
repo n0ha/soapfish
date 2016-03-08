@@ -91,10 +91,13 @@ def url_component(url, item):
 
 def url_template(url):
     '''
-    http://example.net/ws/endpoint --> %s/ws/endpoint
+    http://example.net/ws/endpoint --> %s://%s/ws/endpoint
     '''
     o = list(urlparse(url))
-    o[0:2] = ['{scheme}', '{host}']
+    if six.PY3:
+        o[0:2] = ['{scheme}', '{host}']
+    else:
+        o[0:2] = ['%(scheme)', '%(host)']
     return urlunparse(o)
 
 
