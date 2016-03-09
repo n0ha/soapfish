@@ -1009,6 +1009,7 @@ class ComplexType(six.with_metaclass(Complex_PythonType, Type)):
     def parsexml(cls, xml, schema=None):
         if schema is None:
             parser = etree.fromstring
+            xml = xml.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n", '')
         else:
             if not isinstance(schema, etree.XMLSchema):
                 from .py2xsd import generate_xsd
