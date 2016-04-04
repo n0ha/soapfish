@@ -1027,7 +1027,7 @@ class ComplexType(six.with_metaclass(Complex_PythonType, Type)):
                 f.write(response)
 
         _log_request_to_file(xml)
-        xml = xml.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n", '')
+        xml = xml.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", '')
         if schema is None:
             parser = etree.fromstring
         else:
