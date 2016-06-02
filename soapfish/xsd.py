@@ -1007,26 +1007,6 @@ class ComplexType(six.with_metaclass(Complex_PythonType, Type)):
 
     @classmethod
     def parsexml(cls, xml, schema=None):
-        def _log_request_to_file(response):
-            """
-            Save the received XML response to a temp file.
-
-            :param request: payload
-            """
-            import tempfile
-            import os
-
-            path = '/tmp/odoo-requests'
-            # noinspection PyBroadException
-            try:
-                os.stat(path)
-            except:
-                os.mkdir(path)
-
-            with tempfile.NamedTemporaryFile(prefix=('%s/response-' % path), delete=False) as f:
-                f.write(response)
-
-        _log_request_to_file(xml)
         xml = xml.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", '')
         if schema is None:
             parser = etree.fromstring
