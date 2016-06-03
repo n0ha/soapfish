@@ -155,9 +155,9 @@ class Stub(object):
         headers = SOAP.build_http_request_headers(method.soapAction)
 
         logger.info('Call %r on %r', operationName, self.location)
-        logger.debug('Request Headers: %s', headers)
-        logger.debug('Request Envelope: %s', data)
+        logger.info('Request Headers: %s', headers)
+        logger.info('Request Envelope: %s', data)
         r = requests.post(self.location, auth=auth, headers=headers, data=data)
-        logger.debug('Response Headers: %s', r.headers)
-        logger.debug('Response Envelope: %s', r.text)
+        logger.info('Response Headers: %s', r.headers)
+        logger.info('Response Envelope: %s', r.text)
         return self._handle_response(method, r.headers, r.text)
