@@ -4,11 +4,15 @@
 __all__ = ['SOAPError', 'SOAPRequest', 'SOAPResponse']
 
 class SOAPError(Exception):
-    def __init__(self, code, message, actor=None):
+
+    envelope = None
+
+    def __init__(self, code, message, actor=None, envelope=None):
         super(SOAPError, self).__init__(code, message, actor)
         self.code = code
         self.message = message
         self.actor = actor
+        self.envelope = envelope
 
     def __str__(self):
         return "(%s) %s, actor=%s" % (self.code, self.message, self.actor)

@@ -126,7 +126,7 @@ class Stub(object):
 
         if envelope.Body.Fault:
             code, message, actor = SOAP.parse_fault_message(envelope.Body.Fault)
-            error = core.SOAPError(code=code, message=message, actor=actor)
+            error = core.SOAPError(code=code, message=message, actor=actor, envelope=envelope)
             raise error
 
         if isinstance(method.output, basestring):
