@@ -100,7 +100,8 @@ class Stub(object):
     def __init__(self, username=None, password=None, service=None, location=None, base_url=None):
         self.username = username
         self.password = password
-        self.service = service if service else self.SERVICE
+        self.service = service
+        self.SERVICE = service
         if location:
             self.location = location
         elif base_url:
